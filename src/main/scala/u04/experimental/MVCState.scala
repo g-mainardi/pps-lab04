@@ -17,6 +17,7 @@ import u04.monads.States.State
       val (sm2, am) = m1.run(sm)
       val (sv2, av) = f(am).run(sv)
       ((sm2, sv2), av)
+
   def convertColorToIteration(iteration: Int, maxIterations: Int): java.awt.Color = {
     if (iteration >= maxIterations) java.awt.Color.BLACK
     else {
@@ -25,26 +26,26 @@ import u04.monads.States.State
     }
   }
 
-  def redraw(f: (Int, Int) => Int): State[Window, Unit] = for
-    _ <- drawPixels((x, y) => convertColorToIteration(f(x, y), 1000), "Mandlebrot")
+  def redraw(f: (Int, Int) => Int, iterations: Int): State[Window, Unit] = for
+    _ <- drawPixels((x, y) => convertColorToIteration(f(x, y), iterations), "Mandlebrot")
   yield ()
 
-  def windowCreation(drawer: (Int, Int) => Int): State[Window, Stream[Events]] = for
+  def windowCreation(drawer: (Int, Int) => Int, iterations: Int): State[Window, Stream[Events]] = for
     _ <- setSize(width, height)
     _ <- addCanvas(height, width, "Mandlebrot")
     _ <- show()
-    _ <- drawPixels((x, y) => convertColorToIteration(drawer(x, y), 1000), "Mandlebrot")
+    _ <- drawPixels((x, y) => convertColorToIteration(drawer(x, y), iterations), "Mandlebrot")
     _ <- addButton("Reset", "reset")
     events <- eventStream()
   yield (events)
 
   val controller = for
-    events <- mv(get(width, height), f => windowCreation(f))
-    _ <- seqN(events.map(_ match
+    events <- mv(get(width, height), f => windowCreation(f._1, f._2))
+    _ <- seqN(events.map {
       case CanvasClick(x, y) =>
-        mv(seq(centerIn(x, y, width, height), seq(zoomIn(),get(width, height))), f => redraw(f))
-      case ComponentClick("reset") => mv(seq(reset(), get(width, height)), f => redraw(f)))
-    )
+        mv(seq(centerIn(x, y, width, height), seq(zoomIn(), get(width, height))), f => redraw(f._1, f._2))
+      case ComponentClick("reset") => mv(seq(reset(), get(width, height)), f => redraw(f._1, f._2))
+    })
   yield ()
 
   controller.run((initialFractal(), initialWindow))
