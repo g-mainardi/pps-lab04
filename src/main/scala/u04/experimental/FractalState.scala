@@ -4,10 +4,11 @@ import u04.monads.States.State
 
 trait FractalState:
   type Fractal
+  type Drawer = ((Int, Int) => Int, Int)
   def initialFractal(): Fractal
   def zoomIn(): State[Fractal, Unit]
   def centerIn(xScreen: Int, yScreen: Int, width:Int, height: Int): State[Fractal, Unit]
-  def get(canvasWidth: Int, canvasHeight: Int): State[Fractal, ((Int, Int) => Int, Int)]
+  def get(canvasWidth: Int, canvasHeight: Int): State[Fractal, Drawer]
   def reset(): State[Fractal, Unit]
 
 object FractalStateImpl extends FractalState:
