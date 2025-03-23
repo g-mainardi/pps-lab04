@@ -11,7 +11,8 @@ import u04.monads.States.State
 
   val width = 500
   val height = 500
-  val span = 75
+  val padding = 75
+
   def mv[SM, SV, AM, AV](m1: State[SM,AM], f: AM => State[SV,AV]): State[(SM,SV), AV] = 
     State: (sm, sv) => 
       val (sm2, am) = m1.run(sm)
@@ -40,7 +41,7 @@ import u04.monads.States.State
   def windowCreation(data: Drawer): State[Window, Stream[Events]] = data match
     case (drawer, iterations) =>
       for
-      _ <- setSize(width + span, height + span)
+      _ <- setSize(width + padding, height + padding)
       _ <- addCanvas(height, width, "Mandlebrot")
       _ <- addButton("Reset", "reset")
       _ <- show()
@@ -49,7 +50,7 @@ import u04.monads.States.State
     yield (events)
 
   val controller = for
-    events <- mv(get(width, height), f => windowCreation(f._1, f._2))
+    events <- mv(get(width, height), f => windowCreation(f))
     _ <- seqN(events.map {
       case CanvasClick(x, y) =>
         mv(seq(centerIn(x, y, width, height), seq(zoomIn(), get(width, height))), f => redraw(f))
@@ -57,4 +58,4 @@ import u04.monads.States.State
     })
   yield ()
 
-  controller.run((initialFractal(), initialWindow))
+  controller.run((initialFractal(1000), initialWindow))

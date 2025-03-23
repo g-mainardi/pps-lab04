@@ -71,49 +71,42 @@ object WindowStateWithCanvasImpl extends WindowStateWithCanvas:
 
 @main def canvasExample =
   import WindowStateWithCanvasImpl.*
+  val translate = 4
+  val scale = 8
 
-  def computeMandelbrot(cReal: Double, cImaginary: Double, maxIterations: Int): Int =
-    var real, imaginary = 0.0
-    var iteration = 0
-    while (real * real + imaginary * imaginary <= 4.0 && iteration < maxIterations) do
-      val newReal = real * real - imaginary * imaginary + cReal
-      val newImaginary = 2.0 * real * imaginary + cImaginary
-      real = newReal
-      imaginary = newImaginary
-      iteration += 1
-    iteration
+  def distanceToHeart(x: Double, y: Double): Double = {
+    // Scale and translate coordinates to center the heart
+    val nx = x * scale - translate
+    val ny = (y * scale - translate) * -1  // Flip y to match screen coordinates
 
-  def colorFromIterations(iterations: Int, maxIterations: Int): java.awt.Color =
-    if iterations == maxIterations then java.awt.Color.BLACK
-    else new java.awt.Color(iterations * 8 % 256, iterations * 4 % 256, iterations * 2 % 256)
+    // Heart shape formula based on distance
+    val q = nx * nx + ny * ny - 1
+    Math.pow(q, 3) - nx * nx * ny * ny * ny
+  }
 
-  val canvasWidth = 500 // Width of the canvas in pixels
-  val canvasHeight = 500 // Height of the canvas in pixels
-  val maxIterations = 100 // Maximum iterations for Mandelbrot computation
-  val centerX = -0.7 // Center X-coordinate for Mandelbrot zoom
-  val centerY = 0.0 // Center Y-coordinate for Mandelbrot zoom
-  var zoomLevel = 3.0 // Zoom level defining the visible range of the fractal
+  def heartColor(x: Int, y: Int, width: Int, height: Int): java.awt.Color = {
+    // Normalize coordinates between 0 and 1
+    val nx = x.toDouble / width
+    val ny = y.toDouble / height
 
-  def drawer(x: Int, y: Int, centerX: Double, centerY: Double, zoomLevel: Double): java.awt.Color =
-    val scaleX = zoomLevel / canvasWidth
-    val scaleY = zoomLevel / canvasHeight
-    val cReal = (x - canvasWidth / 2) * scaleX + centerX
-    val cImaginary = (y - canvasHeight / 2) * scaleY + centerY
-    val iterations = computeMandelbrot(cReal, cImaginary, maxIterations)
-    colorFromIterations(iterations, maxIterations)
+    val distance = distanceToHeart(nx, ny)
 
-  def stateMandelbrot(): State[(Double, Double, Double), Unit] = State(s => ((centerX, centerY, zoomLevel), {}))
+    // If distance ≤ 0 we're inside the heart
+    if (distance <= 0) {
+      java.awt.Color.RED
+    } else {
+      java.awt.Color.WHITE
+    }
+  }
 
-  def view(render: (Int, Int) => java.awt.Color) = for
-    _ <- setSize(canvasWidth + 100, canvasHeight + 100) // Adjust window size
-    _ <- addCanvas(canvasWidth, canvasHeight, "MandelbrotCanvas")
+  val canvasWidth = 500
+  val canvasHeight = 500
+
+  def view = for
+    _ <- setSize(canvasWidth + 100, canvasHeight + 100)
+    _ <- addCanvas(canvasWidth, canvasHeight, "HeartCanvas")
     _ <- show()
-    _ <- drawPixels(drawer(_, _, centerX, centerY, zoomLevel), "MandelbrotCanvas")
-    e <- eventStream()
-    _ <- seqN(e.map(e => exec {
-      zoomLevel = zoomLevel * 2
-      println(zoomLevel)
-    }))
+    _ <- drawPixels(heartColor(_, _, canvasWidth, canvasHeight), "HeartCanvas")
   yield ()
 
-  view(drawer(_, _, centerX, centerY, zoomLevel)).run(initialWindow)
+  view.run(initialWindow)
