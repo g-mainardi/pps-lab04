@@ -25,6 +25,10 @@ object Ex5Traversable:
     val traversable = summon[Traversable[T]]
     traversable.consumer(t)(log)
 
+  def printAll[T[_] : Traversable, A](t: T[A]): Unit =
+    val traversable = summon[Traversable[T]]
+    traversable.consumer(t)(println(_))
+
   trait Traversable[T[_]]:
     def consumer[A](t: T[A])(c: A => Unit): Unit
 
@@ -44,6 +48,10 @@ object Ex5Traversable:
   val cons1: Int => Unit = a => print(a)
   println:
     logAll(value1)
+  println:
+    printAll(value1)
   val list1 = Cons(10, Cons(20, Nil()))
   println:
     logAll(list1)
+  println:
+    printAll(list1)
