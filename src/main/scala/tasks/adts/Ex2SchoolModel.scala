@@ -121,13 +121,17 @@ object SchoolModel:
     def emptySchool: School = nil()
 
     extension (school: School)
-      def courses(): Sequence[String] = school match
-        case Cons((_, course), t) => cons(course, t.courses() )
-        case _ => nil()
+      def courses(): Sequence[String] =
+        def allCourses(s: School): Sequence[Course] = s match
+          case Cons((_, course), t) => cons(course, allCourses(t))
+          case _ => nil()
+        allCourses(school).distinct()
 
-      def teachers(): Sequence[String] = school match
-        case Cons((teacher, _), t) => cons(teacher, t.teachers())
-        case _ => nil()
+      def teachers(): Sequence[String] =
+        def allTeachers(s: School): Sequence[Teacher] = s match
+          case Cons((teacher, _), t) => cons(teacher, allTeachers(t))
+          case _ => nil()
+        allTeachers(school).distinct()
 
       def setTeacherToCourse(teacher: Teacher, course: Course): School = school match
         case Cons(h, t) => cons(h, t.setTeacherToCourse(teacher, course))

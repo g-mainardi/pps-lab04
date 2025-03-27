@@ -28,9 +28,12 @@ class SchoolTest:
     val twoCourses = emptySchool
       .setTeacherToCourse(teacher("John"), course("Math"))
       .setTeacherToCourse(teacher("John"), course("Italian")).courses()
+    val duplicatedCourses = emptySchool
+      .setTeacherToCourse(teacher("John"), course("Math"))
+      .setTeacherToCourse(teacher("Peter"), course("Math")).courses()
     assertEquals(nil(), noCourses)
     assertEquals(cons("Math", nil()), oneCourse)
-    assertEquals(cons("Math", cons("Italian", nil())), twoCourses)
+    assertEquals(cons("Math", nil()), duplicatedCourses)
 
   @Test def testGetTeachers(): Unit =
     val noTeachers = emptySchool.teachers()
