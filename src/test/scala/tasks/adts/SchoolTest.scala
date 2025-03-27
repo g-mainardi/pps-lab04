@@ -22,23 +22,23 @@ class SchoolTest:
     assertEquals(nil(), emptySchool)
 
   @Test def testGetCourses(): Unit =
-    val noCourses = emptySchool.courses
+    val noCourses = emptySchool.courses()
     val oneCourse = emptySchool
-      .setTeacherToCourse(teacher("John"), course("Math")).courses
+      .setTeacherToCourse(teacher("John"), course("Math")).courses()
     val twoCourses = emptySchool
       .setTeacherToCourse(teacher("John"), course("Math"))
-      .setTeacherToCourse(teacher("John"), course("Italian")).courses
+      .setTeacherToCourse(teacher("John"), course("Italian")).courses()
     assertEquals(nil(), noCourses)
     assertEquals(cons("Math", nil()), oneCourse)
     assertEquals(cons("Math", cons("Italian", nil())), twoCourses)
 
   @Test def testGetTeachers(): Unit =
-    val noTeachers = emptySchool.teachers
+    val noTeachers = emptySchool.teachers()
     val oneTeacher = emptySchool
-      .setTeacherToCourse(teacher("John"), course("Math")).teachers
+      .setTeacherToCourse(teacher("John"), course("Math")).teachers()
     val duplicatedTeacher = emptySchool
       .setTeacherToCourse(teacher("John"), course("Math"))
-      .setTeacherToCourse(teacher("John"), course("Italian")).teachers
+      .setTeacherToCourse(teacher("John"), course("Italian")).teachers()
     assertEquals(nil(), noTeachers)
     assertEquals(cons("John", nil()), oneTeacher)
     assertEquals(cons("John", nil()), duplicatedTeacher)
@@ -46,8 +46,8 @@ class SchoolTest:
   @Test def testSetTeacherToCourse(): Unit =
     val mySchool = emptySchool
       .setTeacherToCourse(teacher("John"), course("Math"))
-    assertEquals(cons("Math", nil()), mySchool.courses)
-    assertEquals(cons("John", nil()), mySchool.teachers)
+    assertEquals(cons("Math", nil()), mySchool.courses())
+    assertEquals(cons("John", nil()), mySchool.teachers())
 
   @Test def testCoursesOfATeacher(): Unit =
     val coursesSchool1 = emptySchool
