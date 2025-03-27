@@ -34,6 +34,16 @@ object Sequences:
         case Cons(h, t) => Cons(h, t.concat(other))
         case Nil()      => other
 
+      def contains(elem: A): Boolean = l match
+        case Cons(h, t) => elem == h | t.contains(elem)
+        case _ => false
+
+      def distinct(): Sequence[A] =
+        def _distinct(s: Sequence[A])(acc: Sequence[A]): Sequence[A] = s match
+          case Cons(h, t) if !acc.contains(h) => Cons(h, _distinct(t)(Cons(h, acc)))
+          case Cons(_, t) => _distinct(t)(acc)
+          case _ => Nil()
+        _distinct(l)(Nil())
 
     def of[A](n: Int, a: A): Sequence[A] =
       if (n == 0) then Nil[A]() else Cons(a, of(n - 1, a))
