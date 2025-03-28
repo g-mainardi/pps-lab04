@@ -16,6 +16,8 @@ package u04.monads
     _ <- addButton(text = "dec", name = "DecButton")
     _ <- addButton(text = "reset", name = "ResetButton")
     _ <- addButton(text = "quit", name = "QuitButton")
+    _ <- addTextField(text = "write here...", name = "SetterField", 6)
+    _ <- addButton(text = "set", name = "SetButton")
     _ <- addLabel(text = str, name = "Label1")
     _ <- show()
     events <- eventStream()

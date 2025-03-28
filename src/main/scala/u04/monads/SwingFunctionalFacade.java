@@ -11,8 +11,11 @@ class SwingFunctionalFacade {
     public static interface Frame {
         Frame setSize(int width, int height);
         Frame addButton(String text, String name);
+        Frame addTextField(String text, String name, int width);
         Frame addLabel(String text, String name);
         Frame showToLabel(String text, String name);
+        Frame clearTextField(String name);
+        String getText(String name);
         Frame show();
         Supplier<String> events();        
     }
@@ -30,6 +33,7 @@ class SwingFunctionalFacade {
     private static class FrameImpl implements Frame {
         private final JFrame jframe = new JFrame();
         private final Map<String, JButton> buttons = new HashMap<>();
+        private final Map<String, JTextField> fields = new HashMap<>();
         private final Map<String, JLabel> labels = new HashMap<>();
         private final LinkedBlockingQueue<String> eventQueue = new LinkedBlockingQueue<>();
         private final Supplier<String> events = () -> {
@@ -64,6 +68,15 @@ class SwingFunctionalFacade {
         }
 
         @Override
+        public Frame addTextField(String text, String name, int width) {
+            JTextField jtf = new JTextField(name, width);
+            jtf.setText(text);
+            this.fields.put(name, jtf);
+            this.jframe.getContentPane().add(jtf);
+            return this;
+        }
+
+        @Override
         public Frame addLabel(String text, String name) {
             JLabel jl = new JLabel(text);
             this.labels.put(name, jl);
@@ -80,6 +93,17 @@ class SwingFunctionalFacade {
         public Frame showToLabel(String text, String name) {
             this.labels.get(name).setText(text);
             return this;
+        }
+
+        @Override
+        public Frame clearTextField(String name) {
+            this.fields.get(name).setText("");
+            return this;
+        }
+
+        @Override
+        public String getText(String name) {
+            return this.fields.get(name).getText();
         }
 
         @Override

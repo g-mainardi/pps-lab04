@@ -8,8 +8,11 @@ trait WindowState:
   def initialWindow: Window
   def setSize(width: Int, height: Int): State[Window, Unit]
   def addButton(text: String, name: String): State[Window, Unit]
+  def addTextField(text: String, name: String, width: Int): State[Window, Unit]
   def addLabel(text: String, name: String): State[Window, Unit]
   def toLabel(text: String, name: String): State[Window, Unit]
+  def clearTextField(name: String): State[Window, Unit]
+  def getText(name: String): State[Window, String]
   def show(): State[Window, Unit]
   def exec(cmd: =>Unit): State[Window, Unit]
   def eventStream(): State[Window, Stream[String]]
@@ -26,10 +29,16 @@ object WindowStateImpl extends WindowState:
     State(w => ((w.setSize(width, height)), {}))
   def addButton(text: String, name: String): State[Window, Unit] =
     State(w => ((w.addButton(text, name)), {}))
+  def addTextField(text: String, name: String, width: Int): State[Window, Unit] =
+    State(w => ((w.addTextField(text, name, width)), {}))
   def addLabel(text: String, name: String): State[Window, Unit] =
     State(w => ((w.addLabel(text, name)), {}))
   def toLabel(text: String, name: String): State[Window, Unit] =
     State(w => ((w.showToLabel(text, name)), {}))
+  def clearTextField(name: String): State[Window, Unit] =
+    State(w => ((w.clearTextField(name)), {}))
+  def getText(name: String): State[Window, String] =
+    State(w => (w, w.getText(name)))
   def show(): State[Window, Unit] =
     State(w => (w.show, {}))
   def exec(cmd: =>Unit): State[Window, Unit] =
@@ -47,6 +56,7 @@ object WindowStateImpl extends WindowState:
     _ <- addButton(text = "inc", name = "IncButton")
     _ <- addButton(text = "dec", name = "DecButton")
     _ <- addButton(text = "quit", name = "QuitButton")
+    _ <- addTextField(text = "scrivi qui...", name = "inputText", width = 10)
     _ <- addLabel(text = "-", name = "Label1")
     _ <- show()
     e <- eventStream()
