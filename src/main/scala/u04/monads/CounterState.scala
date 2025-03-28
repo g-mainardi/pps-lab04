@@ -8,6 +8,7 @@ trait CounterState:
   def inc(): State[Counter, Unit]
   def dec(): State[Counter, Unit]
   def reset(): State[Counter, Unit]
+  def set(newValue: Int): State[Counter, Unit]
   def get(): State[Counter, Int]
   def nop(): State[Counter, Unit]
 
@@ -20,6 +21,7 @@ object CounterStateImpl extends CounterState:
   def inc(): State[Counter, Unit] = State(i => (i + 1, ()));
   def dec(): State[Counter, Unit] = State(i => (i - 1, ()));
   def reset(): State[Counter, Unit] = State(i => (0, ()));
+  def set(newValue: Int): State[Counter, Unit] = State(i => (newValue, ()));
   def get(): State[Counter, Int] = State(i => (i, i));
   def nop(): State[Counter, Unit] = State(i => (i, ()));
 
@@ -29,9 +31,11 @@ object CounterStateImpl extends CounterState:
   import counterState.*  // or directly, import CounterStateImpl.*
 
   println:
-    inc().run(initialCounter()) // ((),  1)
+    inc().run(initialCounter()) // (1,())
   println:
-    seq(inc(), inc()).run(initialCounter()) // ((), 2)
+    seq(inc(), inc()).run(initialCounter()) // (2,())
+  println:
+    seq(reset(), seq(inc(), get())).run(initialCounter()) // (1,1)
 
   def increment(n: Int): State[Counter, Unit] =
     if (n == 0)
@@ -53,3 +57,13 @@ object CounterStateImpl extends CounterState:
 
   println:
     session.run(initialCounter())  // (5, 0)  
+
+  val session2: State[Counter, Int] =
+    for
+      _ <- set(8)
+      v <- get()
+      _ <- reset()
+    yield v
+
+  println:
+    session2.run(initialCounter()) // (8, 0)
