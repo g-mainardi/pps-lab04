@@ -1,5 +1,7 @@
 package u04.monads
 
+import Optionals.Optional
+
 @main def runMVC =
   import Monads.*, Monad.*, States.*, State.*, CounterStateImpl.*, WindowStateImpl.*
   import u03.extensionmethods.Streams.*
@@ -22,13 +24,29 @@ package u04.monads
     _ <- show()
     events <- eventStream()
   yield events
+  
+  def parse(text: String): State[Window, Optional[Int]] =
+    try
+      val number = text.toInt
+      State(w => (w, Optional.Just(number)))
+    catch
+      case _: NumberFormatException => State(w => (w, Optional.Empty()))
+
+  def getParseAndSet(field: String, label: String): State[(Counter, Window), Unit] = for
+    n <- mv(nop(), _ => for
+      t <- getText(field)
+      n <- parse(t)
+    yield n)
+    f <- mv(seq(set(n.getOrElse(0)), get()), i => toLabel(i.toString, label))
+  yield f
 
   val controller = for
-    events <- mv(seq(reset(), get()), i => windowCreation(i.toString()))
+    events <- mv(seq(reset(), get()), i => windowCreation(i.toString))
     _ <- seqN(events.map(_ match
         case "IncButton" => mv(seq(inc(), get()), i => toLabel(i.toString, "Label1"))
         case "DecButton" => mv(seq(dec(), get()), i => toLabel(i.toString, "Label1"))
         case "ResetButton" => mv(seq(reset(), get()), i => toLabel(i.toString, "Label1"))
+        case "SetButton" => getParseAndSet("SetterField", "Label1")
         case "QuitButton" => mv(nop(), _ => exec(sys.exit()))))
   yield ()
 
