@@ -14,6 +14,9 @@ object Optionals:
       def filter(p: A => Boolean): Optional[A] = m match
         case Just(a) if (p(a)) => m
         case _                 => Empty()
+      def getOrElse(default: A): A = m match
+        case Just(a) => a
+        case _ => default
 
   // extending Optional to be a Monad!
   given Monad[Optional] with
