@@ -21,13 +21,11 @@ object Ex5Traversable:
 
   def log[A](a: A): Unit = println("The next element is: "+a)
 
-  def logAll[T[_]: Traversable, A](t: T[A]): Unit =
-    val traversable = summon[Traversable[T]]
-    traversable.consumer(t)(log)
+  def logAll[T[_]: Traversable, A](t: T[A])(using trav: Traversable[T]): Unit =
+    trav.consumer(t)(log)
 
-  def printAll[T[_] : Traversable, A](t: T[A]): Unit =
-    val traversable = summon[Traversable[T]]
-    traversable.consumer(t)(println(_))
+  def printAll[T[_] : Traversable, A](t: T[A])(using trav: Traversable[T]): Unit =
+    trav.consumer(t)(println)
 
   trait Traversable[T[_]]:
     def consumer[A](t: T[A])(c: A => Unit): Unit
