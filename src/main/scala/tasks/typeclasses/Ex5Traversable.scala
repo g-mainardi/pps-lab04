@@ -41,13 +41,23 @@ object Ex5Traversable:
       case _ => ()
 
 @main def tryGeneralisation =
-  import Ex5Traversable.{*, given}
+  import Ex5Traversable.*
   val value1: Optional[Int] = Just(7)
   val cons1: Int => Unit = a => print(a)
   println:
     logAll(value1)
   println:
     printAll(value1)
+
+  given Traversable[Optional] with
+    def consumer[A](t: Optional[A])(c: A => Unit): Unit = t match
+      case Just(a) => println("new given")
+      case _ => ()
+  println:
+    logAll(value1)
+  println:
+    printAll(value1)
+
   val list1 = Cons(10, Cons(20, Nil()))
   println:
     logAll(list1)
